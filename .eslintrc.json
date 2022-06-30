@@ -53,7 +53,7 @@
     "rules": {
         "object-curly-newline": "off",
         "import/prefer-default-export": "off",
-        "prettier/prettier": "error",
+        "prettier/prettier": "off",
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "quotes": ["error", "double", { "allowTemplateLiterals": true }],
         "camelcase": ["off", { "properties": "never" }],

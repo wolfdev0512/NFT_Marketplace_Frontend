@@ -66,7 +66,11 @@ const Header = ({ className }) => {
                                             color="primary-alta"
                                             className="connectBtn"
                                             size="small"
-                                            onClick={() => authenticate()}
+                                            onClick={() =>
+                                                authenticate({
+                                                    provider: "metamask",
+                                                })
+                                            }
                                         >
                                             Wallet connect
                                         </Button>
