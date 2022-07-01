@@ -10,11 +10,13 @@ const WalletModal = ({ show, handleModal }) => {
     authenticate({
       provider: "metamask",
     });
+    handleModal();
   };
   const clickWalletConnect = () => {
     authenticate({
       provider: "walletconnect",
     });
+    handleModal();
   };
   return (
     <Modal
