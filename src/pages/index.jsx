@@ -18,64 +18,62 @@ import sellerData from "../data/sellers.json";
 import collectionsData from "../data/collections.json";
 
 export async function getStaticProps() {
-    return { props: { className: "template-color-1" } };
+  return { props: { className: "template-color-1" } };
 }
 
 const Home = () => {
-    const content = normalizedData(homepageData?.content || []);
-    const liveAuctionData = productData.filter(
-        (prod) =>
-            prod?.auction_date && new Date() <= new Date(prod?.auction_date)
-    );
-    const newestData = productData
-        .sort(
-            (a, b) =>
-                Number(new Date(b.published_at)) -
-                Number(new Date(a.published_at))
-        )
-        .slice(0, 5);
+  const content = normalizedData(homepageData?.content || []);
+  const liveAuctionData = productData.filter(
+    (prod) => prod?.auction_date && new Date() <= new Date(prod?.auction_date)
+  );
+  const newestData = productData
+    .sort(
+      (a, b) =>
+        Number(new Date(b.published_at)) - Number(new Date(a.published_at))
+    )
+    .slice(0, 5);
 
-    return (
-        <Wrapper>
-            <SEO pageTitle="Home Default" />
-            <Header />
-            <main id="main-content">
-                <HeroArea data={content["hero-section"]} />
-                <LiveExploreArea
-                    data={{
-                        ...content["live-explore-section"],
-                        products: liveAuctionData,
-                    }}
-                />
-                <ServiceArea data={content["service-section"]} />
-                <NewestItmesArea
-                    data={{
-                        ...content["newest-section"],
-                        products: newestData,
-                    }}
-                />
-                <TopSellerArea
-                    data={{
-                        ...content["top-sller-section"],
-                        sellers: sellerData,
-                    }}
-                />
-                <ExploreProductArea
-                    data={{
-                        ...content["explore-product-section"],
-                        products: productData,
-                    }}
-                />
-                <CollectionArea
-                    data={{
-                        ...content["collection-section"],
-                        collections: collectionsData.slice(0, 4),
-                    }}
-                />
-            </main>
-            <Footer />
-        </Wrapper>
-    );
+  return (
+    <Wrapper>
+      <SEO pageTitle="Home" />
+      <Header />
+      <main id="main-content">
+        <HeroArea data={content["hero-section"]} />
+        <LiveExploreArea
+          data={{
+            ...content["live-explore-section"],
+            products: liveAuctionData,
+          }}
+        />
+        <ServiceArea data={content["service-section"]} />
+        <NewestItmesArea
+          data={{
+            ...content["newest-section"],
+            products: newestData,
+          }}
+        />
+        <TopSellerArea
+          data={{
+            ...content["top-sller-section"],
+            sellers: sellerData,
+          }}
+        />
+        <ExploreProductArea
+          data={{
+            ...content["explore-product-section"],
+            products: productData,
+          }}
+        />
+        <CollectionArea
+          data={{
+            ...content["collection-section"],
+            collections: collectionsData.slice(0, 4),
+          }}
+        />
+      </main>
+      <Footer />
+    </Wrapper>
+  );
 };
 
 export default Home;
