@@ -23,7 +23,7 @@ const Header = ({ className }) => {
   const { offcanvas, offcanvasHandler } = useOffcanvas();
   const { search, searchHandler } = useFlyoutSearch();
   const { isAuthenticated } = useMoralis();
-  const [showWalletModal, setShowWalletModal] = useState(true);
+  const [showWalletModal, setShowWalletModal] = useState(false);
 
   return (
     <>
