@@ -7,8 +7,13 @@ import Button from "@ui/button";
 import ProductModal from "@components/modals/product-modal";
 import ErrorText from "@ui/error-text";
 import { toast } from "react-toastify";
+import { useMoralis } from "react-moralis";
+
+//import abi and contract address
+import { contract_abi, contract_address } from "../../contract/contractInfo";
 
 const CreateNewArea = ({ className, space }) => {
+    const { Moralis, account, isAuthenticated } = useMoralis();
     const [showProductModal, setShowProductModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState();
     const [hasImageError, setHasImageError] = useState(false);
@@ -23,7 +28,11 @@ const CreateNewArea = ({ className, space }) => {
         mode: "onChange",
     });
 
-    const notify = () => toast("Your product has submitted");
+    const notify = (value) => {
+        // console.log(value)
+        toast(value);
+        // toast("Your product has submitted")
+    };
     const handleProductModal = () => {
         setShowProductModal(false);
     };
@@ -35,7 +44,7 @@ const CreateNewArea = ({ className, space }) => {
         }
     };
 
-    const onSubmit = (data, e) => {
+    const onSubmit = async(data, e) => {
         const { target } = e;
         const submitBtn =
             target.localName === "span" ? target.parentElement : target;
@@ -46,9 +55,41 @@ const CreateNewArea = ({ className, space }) => {
             setShowProductModal(true);
         }
         if (!isPreviewBtn) {
-            notify();
-            reset();
-            setSelectedImage();
+            if(isAuthenticated)
+            {
+                const file = new Moralis.File(selectedImage.name, selectedImage);
+                await file.saveIPFS();
+                console.log(file.ipfs(), file.hash());
+                console.log(data);
+                let metaData = {};
+                metaData.name = data.name;
+                metaData.description = data.description;
+                metaData.attributes = [{"trait_type": data.traitType, "value":data.traitValue}];
+                metaData.image = file.ipfs();
+                const metaFile = new Moralis.File("file.json", {
+                    base64:btoa(JSON.stringify(metaData))
+                })
+                await metaFile.saveIPFS();
+                
+                const options = {
+                    contractAddress: contract_address,
+                    functionName: "safeMint",
+                    abi: contract_abi,
+                    params: {
+                      _tokenURI: metaFile.ipfs(),
+                      _addr: account,
+                    },
+                  };
+                  Moralis.executeFunction(options)
+                    .then((response) => toast.success("Successfully minted"))
+                    .catch((err) => console.log(err)); 
+
+            }
+            else{
+                notify("You have to connect wallet");
+            }
+            // reset();
+            // setSelectedImage();
         }
     };
 
@@ -157,27 +198,27 @@ const CreateNewArea = ({ className, space }) => {
                                         <div className="col-md-12">
                                             <div className="input-box pb--20">
                                                 <label
-                                                    htmlFor="Discription"
+                                                    htmlFor="Description"
                                                     className="form-label"
                                                 >
-                                                    Discription
+                                                    Description
                                                 </label>
                                                 <textarea
-                                                    id="discription"
+                                                    id="description"
                                                     rows="3"
                                                     placeholder="e. g. “After purchasing the product you can get item...”"
                                                     {...register(
-                                                        "discription",
+                                                        "description",
                                                         {
                                                             required:
-                                                                "Discription is required",
+                                                                "Description is required",
                                                         }
                                                     )}
                                                 />
-                                                {errors.discription && (
+                                                {errors.description && (
                                                     <ErrorText>
                                                         {
-                                                            errors.discription
+                                                            errors.description
                                                                 ?.message
                                                         }
                                                     </ErrorText>
@@ -185,7 +226,7 @@ const CreateNewArea = ({ className, space }) => {
                                             </div>
                                         </div>
 
-                                        <div className="col-md-4">
+                                        {/* <div className="col-md-4">
                                             <div className="input-box pb--20">
                                                 <label
                                                     htmlFor="price"
@@ -212,52 +253,52 @@ const CreateNewArea = ({ className, space }) => {
                                                     </ErrorText>
                                                 )}
                                             </div>
-                                        </div>
+                                        </div> */}
 
-                                        <div className="col-md-4">
+                                        <div className="col-md-6">
                                             <div className="input-box pb--20">
                                                 <label
-                                                    htmlFor="Size"
+                                                    htmlFor="traitType"
                                                     className="form-label"
                                                 >
-                                                    Size
+                                                    Trait - Type
                                                 </label>
                                                 <input
-                                                    id="size"
+                                                    id="traitType"
                                                     placeholder="e. g. `Size`"
-                                                    {...register("size", {
+                                                    {...register("traitType", {
                                                         required:
-                                                            "Size is required",
+                                                            "Trait - type is required",
                                                     })}
                                                 />
-                                                {errors.size && (
+                                                {errors.traitType && (
                                                     <ErrorText>
-                                                        {errors.size?.message}
+                                                        {errors.traitType?.message}
                                                     </ErrorText>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="col-md-4">
+                                        <div className="col-md-6">
                                             <div className="input-box pb--20">
                                                 <label
-                                                    htmlFor="Propertie"
+                                                    htmlFor="traitValue"
                                                     className="form-label"
                                                 >
-                                                    Properties
+                                                    Trait - Value
                                                 </label>
                                                 <input
-                                                    id="propertiy"
-                                                    placeholder="e. g. `Propertie`"
-                                                    {...register("propertiy", {
+                                                    id="traitValue"
+                                                    placeholder="e. g. `40`"
+                                                    {...register("traitValue", {
                                                         required:
-                                                            "Propertiy is required",
+                                                            "Trait - Value is required",
                                                     })}
                                                 />
-                                                {errors.propertiy && (
+                                                {errors.traitValue && (
                                                     <ErrorText>
                                                         {
-                                                            errors.propertiy
+                                                            errors.traitValue
                                                                 ?.message
                                                         }
                                                     </ErrorText>
@@ -265,7 +306,7 @@ const CreateNewArea = ({ className, space }) => {
                                             </div>
                                         </div>
 
-                                        <div className="col-md-12">
+                                        {/* <div className="col-md-12">
                                             <div className="input-box pb--20">
                                                 <label
                                                     htmlFor="Royality"
@@ -338,7 +379,7 @@ const CreateNewArea = ({ className, space }) => {
                                                     Unlock Purchased
                                                 </label>
                                             </div>
-                                        </div>
+                                        </div> */}
 
                                         <div className="col-md-12 col-xl-4">
                                             <div className="input-box">
